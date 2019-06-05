@@ -1,2 +1,2 @@
-# tensorflow.js facial recognition software
+# tensorflow sentiment recognition
 # jeffrey yang + max hollis
