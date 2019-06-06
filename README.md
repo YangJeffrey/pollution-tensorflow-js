@@ -1,4 +1,3 @@
-# Tensorflow Toxicity Recognition
+# Tensorflow Text Classification
 # By Jeffrey Yang + Max Hollis
-# Use machine learning to identiy toxic messages and react accordingly.
-# https://github.com/tensorflow/tfjs-models/tree/master/toxicity
+<img height = "10%" width = "10%" src="https://cdn-images-1.medium.com/max/1200/1*37N7BHNaEsXPaerNQ8wBdA.png">
