@@ -1,0 +1,287 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-teal.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"> </script>
+       
+
+    
+    <style>
+      button {
+        font-size: 105%;
+      }
+      #demo-status {
+        font-family: Monospace;
+        font-weight: bold;
+      }
+      input {
+        width: 75px;
+      }
+
+      .input-div {
+        padding: 5px;
+        font-family: monospace;
+      }
+      td {
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-bottom: 5px;
+      }
+      #predict-header {
+        font-weight: bold;
+      }
+      .output-div {
+        padding: 5px;
+        padding-top: 20px;
+        font-family: monospace;
+        font-weight: bold;
+       color: rgb(255, 255, 255);
+      }
+      .input-label {
+        display: inline-block;
+        width: 150px;
+      }
+
+      .canvases {
+        display: inline-block;
+      }
+
+      #evaluate-table-title{
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 110%;
+        margin-top: 1em;
+      }
+      #evaluate-table {
+        display: inline-block;
+      }
+
+      #evaluate-table td, #evaluate-table th {
+        font-family: monospace;
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      #evaluate-table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #0076FF;
+      }
+
+      .create-model {
+        display: inline-block;
+      }
+
+      .logit-span {
+        padding-right: 1em;
+      }
+      .correct-prediction {
+        background-color: greenyellow
+      }
+      .wrong-prediction {
+        background-color: red;
+      }
+      .unsure-prediction {
+        background-color: yellow;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Tensorflow Machine Learning: Pollution </h1>
+
+    <div>
+      <div class="horizontal-section">
+        <div class="create-model">
+          <div class="input-div">
+            <span class="input-label">Train Epochs:</span>
+            <input id="train-epochs" type="number" value="40">
+          </div>
+          <div class="input-div">
+            <span class="input-label">Learning Rate:</span>
+            <input id="learning-rate" type="number" value="0.01">
+          </div>
+          <button id="train-from-scratch">Train model from scratch</button>
+        </div>
+
+        <div class="create-model">
+          <button id="load-pretrained-remote" style="display:none">Load hosted pretrained model</button>
+          <button>      POWERED BY DARK SKY</button>
+        </div>
+
+        <div>
+          <span id="demo-status">Standing by.</span>
+        </div>
+
+        <div id="horizontal-section">
+          <div class="canvases" id="lossCanvas"></div>
+          <div class="canvases" id="accuracyCanvas"></div>
+        </div>
+
+        <div id="evaluate">
+          <div id="evaluate-table-title">
+            Pollution Data Table
+          </div>
+          <table id="evaluate-table">
+            <tr>
+              <th>Visibility</th>
+              <th>Cloud Cover</th>
+              <th>UV</th>
+              <th>Ozone</th>
+              <th>True pollution</th>
+              <th>Predicted pollution</th>
+              <th>Probabilities</th>
+            </tr>
+            <tbody id="evaluate-tbody">
+              <tr>
+                <td>
+                  <input id="petal-length" value="5.1">
+                  <button id="petal-length-inc">+</button>
+                  <button id="petal-length-dec">-</button>
+                </td>
+                <td>
+                  <input id="petal-width" value="3.5">
+                  <button id="petal-width-inc">+</button>
+                  <button id="petal-width-dec">-</button>
+                </td>
+                <td>
+                  <input id="sepal-length" value="1.4">
+                  <button id="sepal-length-inc">+</button>
+                  <button id="sepal-length-dec">-</button>
+                </td>
+                <td>
+                  <input id="sepal-width" value="0.2">
+                  <button id="sepal-width-inc">+</button>
+                  <button id="sepal-width-dec">-</button>
+                </td>
+                <td></td>
+                <td id="winner"></td>
+                <td id="logits"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+  
+    <script src="/src.8f9d6a70.js"></script>
+      <div id="current-icon"><div>
+        
+        </div>
+        <div id="current-weather-details">
+             
+        </div>
+        <p id="weather-summary"></p>
+       
+
+        
+    
+  </div></body>
+      <script>
+var visibility;
+var weatherIcon;
+var cloudCover;
+var uvIndex;
+var ozone;
+var temperatureIcon
+var windBearing;
+var windSpeed;
+var weatherSummary;
+
+window.onload = function() {
+  visibility = document.getElementById("petal-length");
+  weatherIcon = document.getElementById("current-icon");
+  couldCover = document.getElementById("petal-width");
+  uvIndex = document.getElementById("sepal-length");
+  ozone = document.getElementById("sepal-width");
+  temperatureIcon = document.getElementById("temperature-icon");
+  windBearing = document.getElementById("current-wind-bearing");
+  windSpeed = document.getElementById("current-wind-speed");
+  weatherSummary = document.getElementById("weather-summary");
+}
+
+function farenheitToCelsius(k) {
+  return Math.round((k - 32) * 0.5556 );
+}
+
+function humidityPercentage(h) {
+  return Math.round(h * 1);
+}
+
+function degreesToDirection(degrees) {
+    var range = 360/16;
+    var low = 360 - range/2;
+    var high = (low + range) % 360;
+    var angles = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    for (i in angles) {
+
+        if(degrees>= low && degrees < high)
+            return angles[i];
+
+        low = (low + range) % 360;
+        high = (high + range) % 360;
+    }
+}
+
+function knotsToKilometres(knot) {
+  return Math.round( knot * 1.852);
+}
+
+var weatherImages = {
+  "clear-day": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Sun_icon.svg/252px-Sun_icon.svg.png",
+  "clear-night": "http://www.clker.com/cliparts/f/S/2/p/7/u/gold-matte-moon.svg",
+  "rain": "https://cdn3.iconfinder.com/data/icons/weather-16/256/Rainy_Day-512.png",
+  "snow": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Nuvola_weather_snow.svg/1000px-Nuvola_weather_snow.svg.png",
+  "sleet": "http://www.clker.com/cliparts/f/6/7/4/1206565674431593790Anonymous_simple_weather_symbols_10.svg.hi.png",
+  "wind": "http://www.haotu.net/up/4233/128/216-wind.png",
+  "fog": "http://www.iconninja.com/files/81/344/943/fog-cloud-hiding-the-sun-weather-interface-symbol-icon.svg",
+  "cloudy": "http://camera.thietbianninh.com/images/icon-2.png",
+  "partly-cloudy-day": "http://meteo.cw/images_www/weather_icons1/weather_icon_03.png",
+  "partly-cloudy-night": "http://icon-park.com/imagefiles/simple_weather_icons_cloudy_night.png",
+  "hail": "http://icons.iconarchive.com/icons/icons8/ios7/256/Weather-Hail-icon.png",
+  "thunderstorm": "http://findicons.com/files/icons/2613/android_weather_extended/480/thunderstorms.png",
+  "tornado": "http://hddfhm.com/images/clipart-of-a-tornado-11.png"
+}
+
+var getWeather = function() {
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(position){
+        var lat = position.coords.latitude;
+        var long = position.coords.longitude;
+        showWeather(lat, long)
+      })
+    }
+       else {
+            window.alert("Could not get location");
+      }
+  }
+ 
+  function showWeather(lat, long) {
+    var url = `https://api.darksky.net/forecast/f672ff13193bfcc40427a678ebfdbc71/${lat},${long}` + `?format=jsonp&callback=displayWeather`;
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = url;
+    document.getElementsByTagName("head")[0].appendChild(script);
+    displayWeather(object)   
+  }
+
+var object;
+
+ function displayWeather(object) {
+    visibility.value = object.currently.visibility;
+    weatherIcon.src = object.currently.icon;
+    couldCover.value = object.currently.cloudCover;
+    uvIndex.value = object.currently.uvIndex;
+    ozone.value = object.currently.ozone;
+   temperatureIcon.src = "https://cdn4.iconfinder.com/data/icons/medicons-2/512/thermometer-512.png";
+    windBearing.innerHTML = "Wind Direction: " + degreesToDirection(object.currently.windBearing);
+    windSpeed.innerHTML = "Wind Speed: " + knotsToKilometres(object.currently.windSpeed) + " km/h";
+    weatherSummary.innerHTML = "Current Location: " + object.timezone + " <br/> <br/> Weather Summary: " + object.currently.summary;
+     document.getElementById("current-icon").style.backgroundColor = "hsl(216, 100%, 60%)"; 
+    document.getElementById("weather-summary").style.backgroundColor = "hsl(216, 100%, 60%)"; 
+    console.log(object);
+ }
+
+getWeather();
+</script>
+</html>
