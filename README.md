@@ -4,4 +4,4 @@
                 </a>
 
 <div> By Jeffrey Yang + Max Hollis </div>
-<div> Version adapted from Tensorflow.js Iris Classification</div>
+<div> Proof of concept adapted from Tensorflow.js Iris Classification</div>
