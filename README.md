@@ -4,4 +4,4 @@
                 </a>
 
 <div> By Jeffrey Yang + Max Hollis </div>
-<div> open source code will be released soon! </div>
+<div> Version adapted from Tensorflow.js Iris Classification</div>
